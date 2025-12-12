@@ -1,0 +1,37 @@
+# Redis Configuration
+# ================================
+
+# Network
+bind 127.0.0.1
+port GANTI_PORT
+timeout 0
+tcp-keepalive 300
+
+# General
+daemonize no
+pidfile ./data/redis_GANTI_PORT.pid
+loglevel notice
+
+# Data Directory
+dir ./data
+
+# Snapshotting (RDB)
+save 900 1
+save 300 10
+save 60 10000
+dbfilename dump_GANTI_PORT.rdb
+
+# Append Only File (AOF)
+appendonly yes
+appendfilename "appendonly_GANTI_PORT.aof"
+appendfsync everysec
+
+# Memory Management
+maxmemory 256mb
+maxmemory-policy allkeys-lru
+
+# Security
+requirepass GANTI_PASSWORD
+
+# Limits
+maxclients 100

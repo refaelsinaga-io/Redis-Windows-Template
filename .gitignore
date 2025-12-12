@@ -1,0 +1,6 @@
+# Data files (auto-generated)
+data/
+logs/
+
+# Config dengan password asli (gunakan redis.conf.example sebagai template)
+redis.conf
