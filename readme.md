@@ -1,8 +1,95 @@
-# Redis Instance - Port 6384
+# Redis Windows Template
 
-Dokumentasi konfigurasi Redis pada port 6384.
+Template konfigurasi Redis untuk Windows dengan Windows Service.
 
-> **Instalasi Redis:** Lihat [INSTALL.md](INSTALL.md)
+Repository: https://github.com/refaelsinaga-io/Redis-Windows-Template
+
+---
+
+## Instalasi Redis di Windows
+
+### Download Redis
+
+Download Redis untuk Windows dari:
+- https://github.com/tporadowski/redis/releases
+
+### Pilihan Format Install
+
+#### 1. ZIP (Recommended untuk Production)
+
+**Download:** `Redis-x64-5.0.14.1.zip`
+
+**Langkah:**
+1. Extract ke folder, contoh:
+   ```
+   D:\Redis\
+   ├── redis-server.exe
+   ├── redis-cli.exe
+   └── ... (file lainnya)
+   ```
+
+2. Tambahkan ke System PATH:
+   - Buka **System Properties** → **Environment Variables**
+   - Edit **Path** → Add `D:\Redis`
+   - Atau via CMD (Run as Admin):
+     ```cmd
+     setx PATH "%PATH%;D:\Redis" /M
+     ```
+
+3. Buka CMD baru, test:
+   ```cmd
+   redis-server --version
+   redis-cli --version
+   ```
+
+**Kelebihan ZIP:**
+- Tidak install service default 6379 yang tidak dipakai
+- Lebih bersih, hanya jalankan service yang kamu mau
+- Bisa taruh di folder custom
+
+#### 2. MSI (Installer)
+
+**Download:** `Redis-x64-5.0.14.1.msi`
+
+**Langkah:**
+1. Double-click file MSI
+2. Next → Next → Install
+3. Selesai
+
+**Hasil:**
+- Install ke `C:\Program Files\Redis`
+- Otomatis ditambahkan ke PATH
+- Otomatis install service default (port 6379)
+
+**Catatan:**
+- Service default 6379 akan otomatis jalan
+- Jika tidak dipakai, bisa di-disable:
+  ```cmd
+  sc stop Redis
+  sc config Redis start= disabled
+  ```
+
+### Rekomendasi
+
+| Kebutuhan | Pilihan |
+|-----------|---------|
+| Production server | ZIP |
+| Development/testing | MSI atau ZIP |
+| Multiple Redis instances | ZIP |
+
+### Verifikasi Instalasi
+
+Buka CMD baru:
+```cmd
+redis-server --version
+```
+
+Output contoh:
+```
+Redis server v=5.0.14.1 sha=ec77f72d:0 malloc=jemalloc-5.2.1-redis bits=64 build=5627b8177c9289c
+```
+
+Jika muncul error "not recognized", pastikan PATH sudah benar dan buka CMD baru.
 
 ---
 
@@ -10,7 +97,7 @@ Dokumentasi konfigurasi Redis pada port 6384.
 
 ### Port
 ```
-port 6384
+port GANTI_PORT
 ```
 
 ### Password
@@ -29,33 +116,70 @@ maxmemory-policy allkeys-lru
 ## Struktur Folder
 
 ```
-redis_6384/
-├── redis.conf             # File konfigurasi Redis
+Redis-Windows-Template/
+├── redis.conf.example     # Template konfigurasi (GANTI_PORT, GANTI_PASSWORD)
 ├── install-service.bat    # Install Windows Service (Run as Admin)
 ├── uninstall-service.bat  # Hapus Windows Service (Run as Admin)
 ├── start-service.bat      # Start service manual
 ├── stop-service.bat       # Stop service manual
 ├── check-redis.bat        # Cek status Redis
 ├── readme.md              # Dokumentasi ini
-├── data/                  # Data persistence
-│   ├── dump_6384.rdb          # RDB snapshot
-│   ├── appendonly_6384.aof    # AOF file
-│   └── redis_6384.pid         # PID file
-└── logs/                  # Log files
+├── .gitignore             # Ignore redis.conf, data/, logs/
+├── data/                  # Data persistence (auto-generated)
+└── logs/                  # Log files (auto-generated)
 ```
 
 ---
 
-## Install Windows Service (Recommended)
+## Deploy ke Server
 
-### Install Service (sekali saja)
-1. Klik kanan `install-service.bat`
-2. Pilih **Run as Administrator**
-3. Redis akan otomatis jalan saat Windows boot
+### 1. Clone Repository
 
-### Uninstall Service
-1. Klik kanan `uninstall-service.bat`
-2. Pilih **Run as Administrator**
+```cmd
+git clone https://github.com/refaelsinaga-io/Redis-Windows-Template.git
+cd Redis-Windows-Template
+```
+
+### 2. Buat Config dari Template
+
+```cmd
+copy redis.conf.example redis.conf
+```
+
+### 3. Edit redis.conf
+
+Ganti semua placeholder:
+```
+port GANTI_PORT           → port 6384
+requirepass GANTI_PASSWORD → requirepass PasswordKuat123!
+
+pidfile ./data/redis_GANTI_PORT.pid      → pidfile ./data/redis_6384.pid
+dbfilename dump_GANTI_PORT.rdb           → dbfilename dump_6384.rdb
+appendfilename "appendonly_GANTI_PORT.aof" → appendfilename "appendonly_6384.aof"
+```
+
+### 4. Update BAT Files
+
+Edit password di file-file berikut:
+- `install-service.bat` - ganti `GANTI_PASSWORD`
+- `check-redis.bat` - ganti `GANTI_PASSWORD`
+
+### 5. Buat Folder
+
+```cmd
+mkdir data
+mkdir logs
+```
+
+### 6. Install Service
+
+Klik kanan `install-service.bat` → **Run as Administrator**
+
+### 7. Verifikasi
+
+```cmd
+redis-cli -p 6384 -a PasswordKuat123! ping
+```
 
 ---
 
@@ -126,103 +250,10 @@ r = redis.Redis(host='127.0.0.1', port=6384, password='GANTI_PASSWORD')
 
 ---
 
-## Deploy ke Production Server
-
-### Cara 1: Clone dari Git
-
-1. **Clone repository:**
-   ```cmd
-   git clone https://github.com/refaelsinaga-io/Redis-Windows-Template.git
-   cd Redis-Windows-Template
-   ```
-
-2. **Copy template config:**
-   ```cmd
-   copy redis.conf.example redis.conf
-   ```
-
-3. **Edit `redis.conf`** - ganti placeholder:
-   ```
-   port GANTI_PORT           → port 6384
-   requirepass GANTI_PASSWORD → requirepass PasswordKuat123!
-   ```
-
-   Ganti juga semua `GANTI_PORT` di nama file (pidfile, dbfilename, appendfilename)
-
-4. **Buat folder:**
-   ```cmd
-   mkdir data
-   mkdir logs
-   ```
-
-5. **Update password di `check-redis.bat`** (sesuaikan port dan password)
-
-6. **Install service:**
-   - Klik kanan `install-service.bat` → Run as Administrator
-
-7. **Verifikasi:**
-   ```cmd
-   redis-cli -p 6384 -a PasswordKuat123! ping
-   ```
-
----
-
-### Cara 2: Copy Manual
-
-### File yang perlu dibawa:
-```
-redis_6384/
-├── redis.conf.example     # Template config
-├── install-service.bat    # WAJIB
-├── uninstall-service.bat  # Optional
-├── start-service.bat      # Optional
-├── stop-service.bat       # Optional
-├── check-redis.bat        # Optional
-└── readme.md              # Optional
-```
-
-### File yang TIDAK perlu dibawa:
-- `redis.conf` - berisi password, buat dari template
-- `data/` - akan dibuat otomatis oleh Redis
-- `logs/` - akan dibuat otomatis
-
-### Langkah Deploy:
-
-1. **Copy folder** ke server
-
-2. **Copy template config:**
-   ```cmd
-   copy redis.conf.example redis.conf
-   ```
-
-3. **Edit `redis.conf`** - ganti placeholder:
-   ```
-   port GANTI_PORT           → port 6384
-   requirepass GANTI_PASSWORD → requirepass PasswordKuat123!
-   ```
-
-4. **Buat folder:**
-   ```cmd
-   mkdir data
-   mkdir logs
-   ```
-
-5. **Update password di `check-redis.bat`**
-
-6. **Install service:**
-   - Klik kanan `install-service.bat` → Run as Administrator
-
-7. **Verifikasi:**
-   ```cmd
-   redis-cli -p 6384 -a PasswordKuat123! ping
-   ```
-
----
-
 ## Troubleshooting
 
 ### Redis tidak mau start
-1. Cek apakah port 6384 sudah dipakai:
+1. Cek apakah port sudah dipakai:
    ```
    netstat -an | findstr 6384
    ```
