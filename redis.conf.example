@@ -1,5 +1,7 @@
 # Redis Configuration
 # ================================
+# PENTING: Ganti GANTI_PATH dengan absolute path folder Redis kamu
+# Contoh: E:/DATABASE/REDIS/redis_6384
 
 # Network
 bind 127.0.0.1
@@ -9,11 +11,12 @@ tcp-keepalive 300
 
 # General
 daemonize no
-pidfile ./data/redis_GANTI_PORT.pid
+pidfile GANTI_PATH/data/redis_GANTI_PORT.pid
 loglevel notice
+logfile GANTI_PATH/logs/redis.log
 
-# Data Directory
-dir ./data
+# Data Directory (HARUS absolute path untuk Windows Service)
+dir GANTI_PATH/data
 
 # Snapshotting (RDB)
 save 900 1

@@ -150,13 +150,25 @@ copy redis.conf.example redis.conf
 
 Ganti semua placeholder:
 ```
-port GANTI_PORT           → port 6384
-requirepass GANTI_PASSWORD → requirepass PasswordKuat123!
-
-pidfile ./data/redis_GANTI_PORT.pid      → pidfile ./data/redis_6384.pid
-dbfilename dump_GANTI_PORT.rdb           → dbfilename dump_6384.rdb
-appendfilename "appendonly_GANTI_PORT.aof" → appendfilename "appendonly_6384.aof"
+GANTI_PATH                → E:/DATABASE/REDIS/redis_6384 (absolute path folder kamu)
+GANTI_PORT                → 6384
+GANTI_PASSWORD            → PasswordKuat123!
 ```
+
+Contoh hasil:
+```
+port 6384
+requirepass PasswordKuat123!
+
+pidfile E:/DATABASE/REDIS/redis_6384/data/redis_6384.pid
+logfile E:/DATABASE/REDIS/redis_6384/logs/redis.log
+dir E:/DATABASE/REDIS/redis_6384/data
+
+dbfilename dump_6384.rdb
+appendfilename "appendonly_6384.aof"
+```
+
+**PENTING:** Path `dir`, `pidfile`, dan `logfile` HARUS menggunakan absolute path agar Windows Service bisa jalan dengan benar.
 
 ### 4. Update BAT Files
 
