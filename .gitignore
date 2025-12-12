@@ -4,3 +4,7 @@ logs/
 
 # Config dengan password asli (gunakan redis.conf.example sebagai template)
 redis.conf
+
+# Batch files dengan password (gunakan *.example sebagai template)
+install-service.bat
+check-redis.bat
